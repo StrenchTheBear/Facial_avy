@@ -1,45 +1,43 @@
 version: 0.0
 os: linux
 files:
-  - source: AspNetCoreWebApplication/bin/release/netcoreapp3.1/
-    destination: /home/ec2-user/aspnetcoreapp
-  - source: AspNetCoreWebApplication/wwwroot/
-    destination: /home/ec2-user/aspnetcoreapp/wwwroot
-  - source: scripts/virtualhost.conf
-    destination: /home/ec2-user/aspnetcoreapp
-  - source: scripts/kestrel-aspnetcoreapp.service
-    destination: /etc/systemd/system/
-  - source: /requirements.txt
-    destination: /home/ec2-user
+ - source: /ec2django/
+   destination: /home/ec2-user/ec2django
+ - source: /helloworld/
+   destination: /home/ec2-user/helloworld
+ - source: /manage.py
+   destination: /home/ec2-user
+ - source: /supervisord.conf
+   destination: /home/ec2-user
+ - source: /requirements.txt
+   destination: /home/ec2-user
+ - source: /requirements/
+   destination: /home/ec2-user/requirements
+
+permissions:
+  - object: /home/ec2-user/manage.py
+    owner: ec2-user
+    mode: 644
+    type:
+      - file
+  - object: /home/ec2-user/supervisord.conf
+    owner: ec2-user
+    mode: 644
+    type:
+      - file
 hooks:
-  ApplicationStop:
-    - location: scripts/stop_service
-      timeout: 300
-      runas: root
-
-  BeforeInstall:
-    - location: scripts/remove_application
-      timeout: 300
-      runas: root
-
   AfterInstall:
-    - location: scripts/install_python3
+    - location: scripts/install_dependencies
       timeout: 300
       runas: root
-
     - location: scripts/codestar_remote_access
       timeout: 300
       runas: root
-
-    - location: scripts/install_httpd
+    - location: scripts/start_server
       timeout: 300
       runas: root
 
-    - location: scripts/install_dotnetcore
-      timeout: 500
-      runas: root
-
-  ApplicationStart:
-    - location: scripts/start_service
+  ApplicationStop:
+    - location: scripts/stop_server
       timeout: 300
       runas: root
